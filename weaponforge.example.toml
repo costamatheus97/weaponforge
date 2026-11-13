@@ -1,0 +1,48 @@
+# weaponforge settings. Copy this file to weaponforge.toml (next to it, git-ignored) and uncomment what you need, or point
+# WEAPONFORGE_CONFIG at a file of your own. Nothing here is required: every key has a default that works with no file at all.
+#
+# Each key can also be set in the environment, which wins over this file: WEAPONFORGE_<KEY> with the key in capitals and
+# the table's name in front, e.g. WEAPONFORGE_BLENDER, WEAPONFORGE_ASSETS, WEAPONFORGE_UNREAL_CONTENT.
+# `bin/weaponforge settings` prints every value and where it came from.
+#
+# A relative path is taken from this file's folder. Under WSL with a Windows Blender, a /mnt/d/... path and a D:\... path
+# both work (write a Windows path with single quotes, 'D:\Games\blender\blender.exe', or with forward slashes).
+
+# The Blender 5.2 executable. Default: `blender` on PATH.
+#   Linux    "/opt/blender-5.2/blender"
+#   macOS    "/Applications/Blender.app/Contents/MacOS/Blender"
+#   WSL      "/mnt/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"   (a Windows Blender, GPU baking)
+# blender = ""
+
+# The asset root: each weapon's .blend, bakes, textures, FBX files and spec go to <assets>/<id>/; the presentation pictures,
+# the viewer copies and the review packs go beside the weapons, to <assets>/_gallery/. Default: build/weapons.
+# assets = "build/weapons"
+
+# Where <id>.json (the spec the Unreal adapter reads) is written. Default: beside the weapon's files, <assets>/<id>/<id>.json.
+# Set it to keep the specs in your game project's own documents.
+# spec_dir = ""
+
+# One more folder searched for painted texforge sets and decals (<folder>/<name>/<name>_BaseColor.png), after the weapon's
+# textures/ and <assets>/_materials/. Default: none. weapons/assault_g3/painted/ says how to make AssaultG3's.
+# materials = ""
+
+[unreal]
+# The optional Unreal adapter (integrations/unreal/, untested since extraction: docs/unreal.md).
+# Each weapon is imported to <content>/<Name>/, a trial run (--root builds, --dest) to <content>/_Scratch/<Name>/.
+# content = "/Game/Weapons"
+
+# The material every MI_<Name> is an instance of. It must exist in the project before the first import (docs/unreal.md,
+# the master material): three texture parameters and two scalars, named below.
+# master_material = "/Game/Materials/M_Weapon"
+# param_base_color = "BaseColor"           # texture, sRGB: T_<Name>_BC
+# param_normal = "Normal"                  # texture, normal map: T_<Name>_N (OpenGL on disk; the import flips green)
+# param_masks = "ARM"                      # texture, masks: T_<Name>_ORM (R occlusion, G roughness, B metallic)
+# param_roughness_scale = "RoughnessScale" # scalar, multiplies G; set to 1.0
+# param_metallic_scale = "MetallicScale"   # scalar, multiplies B; set to 1.0
+
+# Needed only for `weaponforge <id> unreal-import` and `unreal-check` (integrations/unreal/run.sh).
+#   Linux    editor = "/opt/UnrealEngine/Engine/Binaries/Linux/UnrealEditor-Cmd"
+#   macOS    editor = "/Users/Shared/Epic Games/UE_5.6/Engine/Binaries/Mac/UnrealEditor-Cmd"
+#   WSL      editor = "/mnt/c/Program Files/Epic Games/UE_5.6/Engine/Binaries/Win64/UnrealEditor-Cmd.exe"
+# editor = ""
+# project = "/path/to/MyGame/MyGame.uproject"

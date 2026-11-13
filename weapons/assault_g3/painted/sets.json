@@ -1,0 +1,829 @@
+{
+ "about": "Where the 12 painted texture sets made for AssaultG3 came from and how to make them again. regenerate.sh runs these commands in this order. Paths are relative to the texforge output folder (regenerate.sh: <out>/texforge/); every command is given as the arguments after `texforge --out <that folder>`.",
+ "prompts": "All seven `texforge gen` prompts are exact (copied from the scripts that ran them). A new gen does not give the same pictures: the five tiles and the four leak and scrape decals will come out as new pictures of the same material, so choose the candidate by eye by \"chosen_because\". The three hand-made decals and the two soft variants (given the same chosen candidates) are reproduced exactly.",
+ "requires": {
+  "texforge": "a texforge with these gen / make / decal options; gen needs an image generator (texforge's default backend is the codex CLI; TEXFORGE_GENERATOR=command runs your own). A generator never gives the same picture twice: regenerated tiling sets differ from the originals",
+  "python": "numpy and Pillow for make_decals.py and soften.py (byte-identical with numpy 1.26.4, Pillow 10.4.0)",
+  "fonts": "arialbd.ttf (Arial Bold) and Inkfree.ttf (Ink Free), from a Windows Fonts folder, for make_decals.py to give the original pictures byte for byte; without them it draws with a free font it finds (Liberation Sans, DejaVu Sans), and the stencil's and the label's lettering differ a little"
+ },
+ "layout": "_materials/<name>/: <name>_BaseColor.png, <name>_Height.png, <name>.texforge.json, and <name>_Opacity.png for a decal. Each record (.texforge.json) also carries params.source, the absolute path of the picture it was made from on the machine that made it; that path differs from machine to machine. For the seven decals it was checked to be the only difference in the record; the five tile records were not regenerated in the check.",
+ "used_on_frame": "AssaultG3 weapons/assault_g3/weapon.py: tile sets through the named finishes (weaponforge/finish.py) per material kind; decal boxes in cm in the weapon frame (x toward the muzzle, +Y its left, +Z up), \"from\" the side the picture is laid on from",
+ "order": [
+  "gen poly_mould, rubber, anodised, phosphate, turned, leak_src, scrape_src",
+  "make the five tiles",
+  "make_decals.py (stencil_07, label_14, witness pictures)",
+  "soften.py (leak_soft, scrape_soft pictures)",
+  "decal label_14, stencil_07, witness, leak, scrape, leak_soft, scrape_soft",
+  "keep into _materials/<name>/"
+ ],
+ "sets": [
+  {
+   "name": "anodised",
+   "kind": "tile",
+   "source": {
+    "method": "texforge gen (Codex image model)",
+    "command": [
+     "gen",
+     "hard-anodised aluminium surface in a dark charcoal grey, a fine even bead-blasted matte grain, very faint straight parallel machining passes running horizontally, even",
+     "--name",
+     "anodised",
+     "--n",
+     "2",
+     "--parallel",
+     "2"
+    ],
+    "prompt": "hard-anodised aluminium surface in a dark charcoal grey, a fine even bead-blasted matte grain, very faint straight parallel machining passes running horizontally, even",
+    "prompt_status": "exact, word for word: copied from the generation script that was run, not recalled",
+    "template": "texforge's material template (prompts.material_prompt) wraps the prompt",
+    "prompt_as_sent": "A square, flat, top-down / straight-on texture swatch of hard-anodised aluminium surface in a dark charcoal grey, a fine even bead-blasted matte grain, very faint straight parallel machining passes running horizontally, even. Orthographic, perfectly straight-on view with absolutely no perspective and no camera tilt. Flat, even, diffuse lighting from everywhere: NO cast shadows, NO directional light, NO highlights, NO vignette, NO lens effects, NO depth of field, NO watermark, NO text, no borders or frame. The material fills the entire frame edge to edge. Physically plausible, photoreal PBR albedo-style photograph scan of the material with fine natural detail, sharp focus everywhere, high resolution. Keep colour variation natural but avoid any single dominant landmark, large stain or gradient (it will be tiled). Keep the pattern axis-aligned (horizontal courses / rows, vertical joints) if it has one.",
+    "prompt_as_sent_note": "the prompt after texforge's CLI template: the text the CLI hands to gen.generate (the texforge copy used had not changed prompts.py or gen.py since before the pass). gen.generate puts it between <<<PROMPT / PROMPT>>> markers inside its own fixed instruction to the Codex agent (gen.py INSTRUCTION: use the built-in image tool, pass the prompt verbatim, one image). What the image model itself finally received was not recorded",
+    "candidates": "two made, both kept",
+    "chosen": "anodised_src_2.png",
+    "chosen_because": "src_1 has a visibly brighter left half; src_2 is even, with the horizontal passes"
+   },
+   "process": {
+    "command": [
+     "make",
+     "anodised/anodised_src_2.png",
+     "--name",
+     "anodised",
+     "--type",
+     "plaster",
+     "--size",
+     "512",
+     "--world-cm",
+     "4",
+     "--no-shadow-lift",
+     "--no-materials",
+     "--normal-strength",
+     "1.0"
+    ],
+    "record": "plaster type: min-cut seams, overlap 1/6, despeckle k=4; height depth 0.4 cm; normal from height, height from luminance (no Codex in make)"
+   },
+   "output": {
+    "size_px": [
+     512,
+     512
+    ],
+    "world_cm": [
+     4,
+     4
+    ]
+   },
+   "used_on": {
+    "finish": "finish.anodised_alloy (texture \"anodised\", laid at 2 cm, tone 0.10, relief 0.6)",
+    "where": "the 'alloy' kind: the top cover and the rail (satin black hard-anodised alloy)"
+   }
+  },
+  {
+   "name": "phosphate",
+   "kind": "tile",
+   "source": {
+    "method": "texforge gen (Codex image model)",
+    "command": [
+     "gen",
+     "manganese phosphate coated steel surface in a dark neutral grey, a dry crystalline matte grain with fine glinting crystals, even",
+     "--name",
+     "phosphate",
+     "--n",
+     "2",
+     "--parallel",
+     "2"
+    ],
+    "prompt": "manganese phosphate coated steel surface in a dark neutral grey, a dry crystalline matte grain with fine glinting crystals, even",
+    "prompt_status": "exact, word for word: copied from the generation script that was run, not recalled",
+    "template": "texforge's material template (prompts.material_prompt) wraps the prompt",
+    "prompt_as_sent": "A square, flat, top-down / straight-on texture swatch of manganese phosphate coated steel surface in a dark neutral grey, a dry crystalline matte grain with fine glinting crystals, even. Orthographic, perfectly straight-on view with absolutely no perspective and no camera tilt. Flat, even, diffuse lighting from everywhere: NO cast shadows, NO directional light, NO highlights, NO vignette, NO lens effects, NO depth of field, NO watermark, NO text, no borders or frame. The material fills the entire frame edge to edge. Physically plausible, photoreal PBR albedo-style photograph scan of the material with fine natural detail, sharp focus everywhere, high resolution. Keep colour variation natural but avoid any single dominant landmark, large stain or gradient (it will be tiled). Keep the pattern axis-aligned (horizontal courses / rows, vertical joints) if it has one.",
+    "prompt_as_sent_note": "the prompt after texforge's CLI template: the text the CLI hands to gen.generate (the texforge copy used had not changed prompts.py or gen.py since before the pass). gen.generate puts it between <<<PROMPT / PROMPT>>> markers inside its own fixed instruction to the Codex agent (gen.py INSTRUCTION: use the built-in image tool, pass the prompt verbatim, one image). What the image model itself finally received was not recorded",
+    "candidates": "two made, both kept",
+    "chosen": "phosphate_src_2.png",
+    "chosen_because": "finer, more even crystals"
+   },
+   "process": {
+    "command": [
+     "make",
+     "phosphate/phosphate_src_2.png",
+     "--name",
+     "phosphate",
+     "--type",
+     "plaster",
+     "--size",
+     "512",
+     "--world-cm",
+     "3",
+     "--no-shadow-lift",
+     "--no-materials",
+     "--normal-strength",
+     "1.0"
+    ],
+    "record": "plaster type: min-cut seams, overlap 1/6, despeckle k=4; height depth 0.4 cm; normal from height, height from luminance (no Codex in make)"
+   },
+   "output": {
+    "size_px": [
+     512,
+     512
+    ],
+    "world_cm": [
+     3,
+     3
+    ]
+   },
+   "used_on": {
+    "finish": "finish.phosphate_parts, finish.barrel_phosphate and finish.sheet_magazine (texture \"phosphate\" at its own 3 cm)",
+    "where": "the 'steel' kind: hardware, trigger, controls, sights, the pad's spacer, the barrel and the magazine"
+   }
+  },
+  {
+   "name": "poly_mould",
+   "kind": "tile",
+   "source": {
+    "method": "texforge gen (Codex image model)",
+    "command": [
+     "gen",
+     "moulded glass-filled nylon polymer surface in a neutral medium grey, a fine spark-eroded mould finish like very fine leather grain, irregular sub-millimetre pebbled micro-relief, a few very faint long soft flow marks, matte, even",
+     "--name",
+     "poly_mould",
+     "--n",
+     "3",
+     "--parallel",
+     "3"
+    ],
+    "prompt": "moulded glass-filled nylon polymer surface in a neutral medium grey, a fine spark-eroded mould finish like very fine leather grain, irregular sub-millimetre pebbled micro-relief, a few very faint long soft flow marks, matte, even",
+    "prompt_status": "exact, word for word: copied from the generation script that was run, not recalled",
+    "template": "texforge's material template (prompts.material_prompt) wraps the prompt",
+    "prompt_as_sent": "A square, flat, top-down / straight-on texture swatch of moulded glass-filled nylon polymer surface in a neutral medium grey, a fine spark-eroded mould finish like very fine leather grain, irregular sub-millimetre pebbled micro-relief, a few very faint long soft flow marks, matte, even. Orthographic, perfectly straight-on view with absolutely no perspective and no camera tilt. Flat, even, diffuse lighting from everywhere: NO cast shadows, NO directional light, NO highlights, NO vignette, NO lens effects, NO depth of field, NO watermark, NO text, no borders or frame. The material fills the entire frame edge to edge. Physically plausible, photoreal PBR albedo-style photograph scan of the material with fine natural detail, sharp focus everywhere, high resolution. Keep colour variation natural but avoid any single dominant landmark, large stain or gradient (it will be tiled). Keep the pattern axis-aligned (horizontal courses / rows, vertical joints) if it has one.",
+    "prompt_as_sent_note": "the prompt after texforge's CLI template: the text the CLI hands to gen.generate (the texforge copy used had not changed prompts.py or gen.py since before the pass). gen.generate puts it between <<<PROMPT / PROMPT>>> markers inside its own fixed instruction to the Codex agent (gen.py INSTRUCTION: use the built-in image tool, pass the prompt verbatim, one image). What the image model itself finally received was not recorded",
+    "candidates": "three asked, two came back (one Codex run timed out at --parallel 3): src_2 and src_3",
+    "chosen": "poly_mould_src_2.png",
+    "chosen_because": "both that came back are clean (no text or marks, flat lit); src_2 has the faint flow marks asked for"
+   },
+   "process": {
+    "command": [
+     "make",
+     "poly_mould/poly_mould_src_2.png",
+     "--name",
+     "poly_mould",
+     "--type",
+     "plaster",
+     "--size",
+     "1024",
+     "--world-cm",
+     "6",
+     "--no-shadow-lift",
+     "--no-materials",
+     "--normal-strength",
+     "1.0"
+    ],
+    "record": "plaster type: min-cut seams, overlap 1/6, despeckle k=4; height depth 0.4 cm; normal from height, height from luminance (no Codex in make)"
+   },
+   "output": {
+    "size_px": [
+     1024,
+     1024
+    ],
+    "world_cm": [
+     6,
+     6
+    ]
+   },
+   "used_on": {
+    "finish": "finish.moulded_polymer (texture \"poly_mould\", laid at 9 cm, tone 0.08, relief 1.3, rough 0.07)",
+    "where": "the 'polymer' kind: the olive shell, the grip and the guard"
+   }
+  },
+  {
+   "name": "rubber",
+   "kind": "tile",
+   "source": {
+    "method": "texforge gen (Codex image model)",
+    "command": [
+     "gen",
+     "dry matte moulded rubber surface in a dark neutral grey, slightly porous, a very fine moulded stipple with tiny pores, a little dust in the pores, even",
+     "--name",
+     "rubber",
+     "--n",
+     "2",
+     "--parallel",
+     "2"
+    ],
+    "prompt": "dry matte moulded rubber surface in a dark neutral grey, slightly porous, a very fine moulded stipple with tiny pores, a little dust in the pores, even",
+    "prompt_status": "exact, word for word: copied from the generation script that was run, not recalled",
+    "template": "texforge's material template (prompts.material_prompt) wraps the prompt",
+    "prompt_as_sent": "A square, flat, top-down / straight-on texture swatch of dry matte moulded rubber surface in a dark neutral grey, slightly porous, a very fine moulded stipple with tiny pores, a little dust in the pores, even. Orthographic, perfectly straight-on view with absolutely no perspective and no camera tilt. Flat, even, diffuse lighting from everywhere: NO cast shadows, NO directional light, NO highlights, NO vignette, NO lens effects, NO depth of field, NO watermark, NO text, no borders or frame. The material fills the entire frame edge to edge. Physically plausible, photoreal PBR albedo-style photograph scan of the material with fine natural detail, sharp focus everywhere, high resolution. Keep colour variation natural but avoid any single dominant landmark, large stain or gradient (it will be tiled). Keep the pattern axis-aligned (horizontal courses / rows, vertical joints) if it has one.",
+    "prompt_as_sent_note": "the prompt after texforge's CLI template: the text the CLI hands to gen.generate (the texforge copy used had not changed prompts.py or gen.py since before the pass). gen.generate puts it between <<<PROMPT / PROMPT>>> markers inside its own fixed instruction to the Codex agent (gen.py INSTRUCTION: use the built-in image tool, pass the prompt verbatim, one image). What the image model itself finally received was not recorded",
+    "candidates": "two made, both kept",
+    "chosen": "rubber_src_2.png",
+    "chosen_because": "the more even stipple with pores (both were clean)"
+   },
+   "process": {
+    "command": [
+     "make",
+     "rubber/rubber_src_2.png",
+     "--name",
+     "rubber",
+     "--type",
+     "plaster",
+     "--size",
+     "1024",
+     "--world-cm",
+     "5",
+     "--no-shadow-lift",
+     "--no-materials",
+     "--normal-strength",
+     "1.0"
+    ],
+    "record": "plaster type: min-cut seams, overlap 1/6, despeckle k=4; height depth 0.4 cm; normal from height, height from luminance (no Codex in make)"
+   },
+   "output": {
+    "size_px": [
+     1024,
+     1024
+    ],
+    "world_cm": [
+     5,
+     5
+    ]
+   },
+   "used_on": {
+    "finish": "finish.rubber (texture \"rubber\" at its own 5 cm, tone 0.12, relief 1.1)",
+    "where": "the 'rubber' kind: the butt pad, the cheek pad, the hold pad and the grip's overmoulded insert"
+   }
+  },
+  {
+   "name": "turned",
+   "kind": "tile",
+   "source": {
+    "method": "texforge gen (Codex image model)",
+    "command": [
+     "gen",
+     "lathe-turned steel surface in a dark blue-grey, very fine straight parallel tool marks running perfectly horizontally across the whole frame, satin, even",
+     "--name",
+     "turned",
+     "--n",
+     "2",
+     "--parallel",
+     "2"
+    ],
+    "prompt": "lathe-turned steel surface in a dark blue-grey, very fine straight parallel tool marks running perfectly horizontally across the whole frame, satin, even",
+    "prompt_status": "exact, word for word: copied from the generation script that was run, not recalled",
+    "template": "texforge's material template (prompts.material_prompt) wraps the prompt",
+    "prompt_as_sent": "A square, flat, top-down / straight-on texture swatch of lathe-turned steel surface in a dark blue-grey, very fine straight parallel tool marks running perfectly horizontally across the whole frame, satin, even. Orthographic, perfectly straight-on view with absolutely no perspective and no camera tilt. Flat, even, diffuse lighting from everywhere: NO cast shadows, NO directional light, NO highlights, NO vignette, NO lens effects, NO depth of field, NO watermark, NO text, no borders or frame. The material fills the entire frame edge to edge. Physically plausible, photoreal PBR albedo-style photograph scan of the material with fine natural detail, sharp focus everywhere, high resolution. Keep colour variation natural but avoid any single dominant landmark, large stain or gradient (it will be tiled). Keep the pattern axis-aligned (horizontal courses / rows, vertical joints) if it has one.",
+    "prompt_as_sent_note": "the prompt after texforge's CLI template: the text the CLI hands to gen.generate (the texforge copy used had not changed prompts.py or gen.py since before the pass). gen.generate puts it between <<<PROMPT / PROMPT>>> markers inside its own fixed instruction to the Codex agent (gen.py INSTRUCTION: use the built-in image tool, pass the prompt verbatim, one image). What the image model itself finally received was not recorded",
+    "candidates": "two made, both kept",
+    "chosen": "turned_src_1.png",
+    "chosen_because": "clean, regular turning lines"
+   },
+   "process": {
+    "command": [
+     "make",
+     "turned/turned_src_1.png",
+     "--name",
+     "turned",
+     "--type",
+     "plaster",
+     "--size",
+     "1024",
+     "--world-cm",
+     "6",
+     "--no-shadow-lift",
+     "--no-materials",
+     "--normal-strength",
+     "1.0"
+    ],
+    "record": "plaster type: min-cut seams, overlap 1/6, despeckle k=4; height depth 0.4 cm; normal from height, height from luminance (no Codex in make)"
+   },
+   "output": {
+    "size_px": [
+     1024,
+     1024
+    ],
+    "world_cm": [
+     6,
+     6
+    ]
+   },
+   "used_on": {
+    "finish": "none at present: finish.bright_steel takes a texture but none by default",
+    "where": "not used by AssaultG3 now (it is not in weapon.py tex_sets): its lines fall under a texel on the barrel, so the barrel keeps the procedural phosphate. Made for a lathe-turned part and kept as a set"
+   }
+  },
+  {
+   "name": "leak",
+   "kind": "decal",
+   "source": {
+    "method": "texforge gen (Codex image model)",
+    "command": [
+     "gen",
+     "dark brown-black oily grime streaks running straight down from a short horizontal line at the top: thin dirty drips of gun oil mixed with dust, narrow and dense at the top, thinning and fading out lower down, vertical",
+     "--name",
+     "leak_src",
+     "--kind",
+     "decal",
+     "--n",
+     "2",
+     "--parallel",
+     "1"
+    ],
+    "prompt": "dark brown-black oily grime streaks running straight down from a short horizontal line at the top: thin dirty drips of gun oil mixed with dust, narrow and dense at the top, thinning and fading out lower down, vertical",
+    "prompt_status": "exact, word for word: copied from the generation script that was run, not recalled",
+    "template": "texforge's decal template (prompts.decal_prompt, white background) wraps the prompt (--kind decal)",
+    "prompt_as_sent": "A single dark brown-black oily grime streaks running straight down from a short horizontal line at the top: thin dirty drips of gun oil mixed with dust, narrow and dense at the top, thinning and fading out lower down, vertical drawn as an isolated surface decal on a perfectly plain, uniform, flat pure white background (no gradient, no texture, no shadows, no floor). Straight-on orthographic view, flat lighting, no perspective, no text, no border. The mark is centred and fully contained with generous empty margin all around it (nothing touches the image edge), its edges fade naturally and softly into the background. Photoreal, high resolution, physically plausible.",
+    "prompt_as_sent_note": "the prompt after texforge's CLI template: the text the CLI hands to gen.generate (the texforge copy used had not changed prompts.py or gen.py since before the pass). gen.generate puts it between <<<PROMPT / PROMPT>>> markers inside its own fixed instruction to the Codex agent (gen.py INSTRUCTION: use the built-in image tool, pass the prompt verbatim, one image). What the image model itself finally received was not recorded",
+    "candidates": "two made, both kept",
+    "chosen": "leak_src_src_2.png",
+    "chosen_because": "the finer drips"
+   },
+   "process": {
+    "command": [
+     "decal",
+     "oil leak",
+     "--image",
+     "leak_src/leak_src_src_2.png",
+     "--name",
+     "leak",
+     "--surface",
+     "dirt",
+     "--size",
+     "1024",
+     "--world-cm",
+     "1.5"
+    ],
+    "record": "background detected from the picture; alpha by smoothstep distance from the background, 6% border fade (texforge decal defaults)"
+   },
+   "output": {
+    "size_px": [
+     299,
+     1024
+    ],
+    "world_cm": [
+     1.5,
+     5.137
+    ],
+    "background": "white"
+   },
+   "used_on": {
+    "where": "not placed on AssaultG3 now: the crisp leak, kept as the unsoftened decal of the picture leak_soft is made from"
+   }
+  },
+  {
+   "name": "leak_soft",
+   "kind": "decal",
+   "source": {
+    "method": "derived from another set",
+    "from": "leak_src/leak_src_src_2.png (the chosen leak_src candidate, as for leak)",
+    "script": "soften.py: a blurred brown stain (blur 22, x0.70, stronger at the top) under the drips, on the same white",
+    "prompt_status": "no prompt of its own: see leak (exact)",
+    "reproducible": "deterministic: the same candidate gives the same picture (checked byte for byte)"
+   },
+   "process": {
+    "command": [
+     "decal",
+     "oil leak, softened",
+     "--image",
+     "leak_src/leak_soft_src.png",
+     "--name",
+     "leak_soft",
+     "--surface",
+     "dirt",
+     "--size",
+     "1024",
+     "--world-cm",
+     "2"
+    ],
+    "record": "background detected from the picture; alpha by smoothstep distance from the background, 6% border fade (texforge decal defaults)"
+   },
+   "output": {
+    "size_px": [
+     308,
+     1024
+    ],
+    "world_cm": [
+     2.0,
+     6.649
+    ],
+    "background": "white"
+   },
+   "used_on": {
+    "where": [
+     {
+      "what": "oil from the charging handle's slot, down the cover and the handguard's left",
+      "box_cm": [
+       [
+        10.4,
+        1.0,
+        6.7
+       ],
+       [
+        12.2,
+        3.6,
+        9.17
+       ]
+      ],
+      "from": "+Y",
+      "as": "darken 0.75, stretched, glossy core"
+     },
+     {
+      "what": "a little oil from the front takedown pin, on the left",
+      "box_cm": [
+       [
+        -5.45,
+        1.0,
+        3.3
+       ],
+       [
+        -4.35,
+        3.4,
+        5.35
+       ]
+      ],
+      "from": "+Y",
+      "as": "darken 0.55, stretched"
+     }
+    ]
+   }
+  },
+  {
+   "name": "scrape",
+   "kind": "decal",
+   "source": {
+    "method": "texforge gen (Codex image model)",
+    "command": [
+     "gen",
+     "A single pale grey scuffed scrape patch on a perfectly plain, uniform, flat pure black background: an irregular ragged abraded area made of many fine straight parallel scratches running diagonally, denser in the middle, fading at its edges. Straight-on orthographic view, flat lighting, no perspective, no shadows, no text, no border. The mark is centred with generous empty black margin all around it. Photoreal, high resolution.",
+     "--name",
+     "scrape_src",
+     "--raw",
+     "--n",
+     "2",
+     "--parallel",
+     "1"
+    ],
+    "prompt": "A single pale grey scuffed scrape patch on a perfectly plain, uniform, flat pure black background: an irregular ragged abraded area made of many fine straight parallel scratches running diagonally, denser in the middle, fading at its edges. Straight-on orthographic view, flat lighting, no perspective, no shadows, no text, no border. The mark is centred with generous empty black margin all around it. Photoreal, high resolution.",
+    "prompt_status": "exact, word for word: copied from the generation script that was run, not recalled",
+    "template": "none: --raw sends the prompt as it is",
+    "prompt_as_sent": "A single pale grey scuffed scrape patch on a perfectly plain, uniform, flat pure black background: an irregular ragged abraded area made of many fine straight parallel scratches running diagonally, denser in the middle, fading at its edges. Straight-on orthographic view, flat lighting, no perspective, no shadows, no text, no border. The mark is centred with generous empty black margin all around it. Photoreal, high resolution.",
+    "prompt_as_sent_note": "the prompt after texforge's CLI template: the text the CLI hands to gen.generate (the texforge copy used had not changed prompts.py or gen.py since before the pass). gen.generate puts it between <<<PROMPT / PROMPT>>> markers inside its own fixed instruction to the Codex agent (gen.py INSTRUCTION: use the built-in image tool, pass the prompt verbatim, one image). What the image model itself finally received was not recorded",
+    "candidates": "two made, both kept",
+    "chosen": "scrape_src_src_2.png",
+    "chosen_because": "the finer scratches"
+   },
+   "process": {
+    "command": [
+     "decal",
+     "scrape",
+     "--image",
+     "scrape_src/scrape_src_src_2.png",
+     "--name",
+     "scrape",
+     "--surface",
+     "generic",
+     "--size",
+     "1024",
+     "--world-cm",
+     "4"
+    ],
+    "record": "background detected from the picture; alpha by smoothstep distance from the background, 6% border fade (texforge decal defaults)"
+   },
+   "output": {
+    "size_px": [
+     1024,
+     747
+    ],
+    "world_cm": [
+     4.0,
+     2.918
+    ],
+    "background": "black"
+   },
+   "used_on": {
+    "where": [
+     {
+      "what": "the 07 rack number rubbed through to the olive in streaks (over stencil_07)",
+      "box_cm": [
+       [
+        -28.9,
+        1.0,
+        4.45
+       ],
+       [
+        -26.7,
+        3.4,
+        6.35
+       ]
+      ],
+      "from": "+Y",
+      "as": "strength 0.70, dark olive colour"
+     }
+    ]
+   }
+  },
+  {
+   "name": "scrape_soft",
+   "kind": "decal",
+   "source": {
+    "method": "derived from another set",
+    "from": "scrape_src/scrape_src_src_2.png (the chosen scrape_src candidate, as for scrape)",
+    "script": "soften.py: a pale blurred patch (blur 16, x0.55) under the scratches, on the same black",
+    "prompt_status": "no prompt of its own: see scrape (exact)",
+    "reproducible": "deterministic: the same candidate gives the same picture (checked byte for byte)"
+   },
+   "process": {
+    "command": [
+     "decal",
+     "scrape, softened",
+     "--image",
+     "scrape_src/scrape_soft_src.png",
+     "--name",
+     "scrape_soft",
+     "--surface",
+     "generic",
+     "--size",
+     "1024",
+     "--world-cm",
+     "4"
+    ],
+    "record": "background detected from the picture; alpha by smoothstep distance from the background, 6% border fade (texforge decal defaults)"
+   },
+   "output": {
+    "size_px": [
+     1024,
+     748
+    ],
+    "world_cm": [
+     4.0,
+     2.922
+    ],
+    "background": "black"
+   },
+   "used_on": {
+    "where": [
+     {
+      "what": "carbon from the ejection port, a soft smudge under its lower lip on the right",
+      "box_cm": [
+       [
+        -13.6,
+        -3.6,
+        6.3
+       ],
+       [
+        -9.4,
+        -1.0,
+        8.05
+       ]
+      ],
+      "from": "-Y",
+      "as": "darken 0.55"
+     },
+     {
+      "what": "the butt's toe, grounded and dragged",
+      "box_cm": [
+       [
+        -29.6,
+        1.0,
+        -0.75
+       ],
+       [
+        -26.8,
+        3.4,
+        1.05
+       ]
+      ],
+      "from": "+Y",
+      "as": "scraped olive, strength 0.8"
+     },
+     {
+      "what": "the butt's toe from underneath",
+      "box_cm": [
+       [
+        -29.8,
+        -1.7,
+        -1.4
+       ],
+       [
+        -27.0,
+        1.7,
+        0.2
+       ]
+      ],
+      "from": "-Z",
+      "as": "scraped olive, strength 0.8"
+     },
+     {
+      "what": "the magazine well's collar",
+      "box_cm": [
+       [
+        -15.6,
+        1.0,
+        -0.2
+       ],
+       [
+        -12.6,
+        3.6,
+        1.8
+       ]
+      ],
+      "from": "+Y",
+      "as": "scraped olive, strength 0.7"
+     },
+     {
+      "what": "the hand stop under the nose",
+      "box_cm": [
+       [
+        18.3,
+        -1.9,
+        4.3
+       ],
+       [
+        20.9,
+        1.9,
+        5.6
+       ]
+      ],
+      "from": "-Z",
+      "as": "scraped olive, strength 0.75"
+     }
+    ]
+   }
+  },
+  {
+   "name": "label_14",
+   "kind": "decal",
+   "source": {
+    "method": "hand-made by a script",
+    "script": "make_decals.py (Pillow drawing, numpy noise, seed 7)",
+    "draws": "a blank paper label with a hand-written \"14\" (Ink Free font), a torn-off corner and dirt along its edge, on blue",
+    "prompt_status": "no prompt: nothing generated",
+    "reproducible": "byte for byte with numpy 1.26.4, Pillow 10.4.0 and the same two Windows font files (checked)"
+   },
+   "process": {
+    "command": [
+     "decal",
+     "hand-made label",
+     "--image",
+     "_handmade/label_14_src.png",
+     "--name",
+     "label_14",
+     "--surface",
+     "generic",
+     "--size",
+     "1024",
+     "--world-cm",
+     "3.2"
+    ],
+    "record": "background detected from the picture; alpha by smoothstep distance from the background, 6% border fade (texforge decal defaults)"
+   },
+   "output": {
+    "size_px": [
+     1024,
+     669
+    ],
+    "world_cm": [
+     3.2,
+     2.091
+    ],
+    "background": "blue (0, 0.098, 0.847)"
+   },
+   "used_on": {
+    "where": "not placed on AssaultG3 now: it was dropped for want of a free flat panel; kept as a set"
+   }
+  },
+  {
+   "name": "stencil_07",
+   "kind": "decal",
+   "source": {
+    "method": "hand-made by a script",
+    "script": "make_decals.py (Pillow drawing, numpy noise, seed 7)",
+    "draws": "a white stencilled \"07\" (Arial Bold, with stencil bridges), overspray and specks of lost paint, on black",
+    "prompt_status": "no prompt: nothing generated",
+    "reproducible": "byte for byte with numpy 1.26.4, Pillow 10.4.0 and the same two Windows font files (checked)"
+   },
+   "process": {
+    "command": [
+     "decal",
+     "hand-made stencil",
+     "--image",
+     "_handmade/stencil_07_src.png",
+     "--name",
+     "stencil_07",
+     "--surface",
+     "generic",
+     "--size",
+     "1024",
+     "--world-cm",
+     "4"
+    ],
+    "record": "background detected from the picture; alpha by smoothstep distance from the background, 6% border fade (texforge decal defaults)"
+   },
+   "output": {
+    "size_px": [
+     1024,
+     781
+    ],
+    "world_cm": [
+     4.0,
+     3.051
+    ],
+    "background": "black"
+   },
+   "used_on": {
+    "where": [
+     {
+      "what": "the rack number on the butt's left, between the flutes and the pad",
+      "box_cm": [
+       [
+        -28.45,
+        1.0,
+        4.85
+       ],
+       [
+        -26.15,
+        3.4,
+        6.95
+       ]
+      ],
+      "from": "+Y",
+      "as": "strength 0.82, worn 0.95"
+     }
+    ]
+   }
+  },
+  {
+   "name": "witness",
+   "kind": "decal",
+   "source": {
+    "method": "hand-made by a script",
+    "script": "make_decals.py (Pillow drawing, numpy noise, seed 7)",
+    "draws": "one short wobbly yellow paint-pen stroke, top to bottom, on black",
+    "prompt_status": "no prompt: nothing generated",
+    "reproducible": "byte for byte with numpy 1.26.4, Pillow 10.4.0 and the same two Windows font files (checked)"
+   },
+   "process": {
+    "command": [
+     "decal",
+     "hand-made witness",
+     "--image",
+     "_handmade/witness_src.png",
+     "--name",
+     "witness",
+     "--surface",
+     "generic",
+     "--size",
+     "1024",
+     "--world-cm",
+     "0.3"
+    ],
+    "record": "background detected from the picture; alpha by smoothstep distance from the background, 6% border fade (texforge decal defaults)"
+   },
+   "output": {
+    "size_px": [
+     189,
+     1024
+    ],
+    "world_cm": [
+     0.3,
+     1.625
+    ],
+    "background": "black"
+   },
+   "used_on": {
+    "where": [
+     {
+      "what": "a paint-pen line across the rear sight's clamp onto the rail",
+      "box_cm": [
+       [
+        -12.75,
+        0.74,
+        11.45
+       ],
+       [
+        -11.95,
+        0.9,
+        12.3
+       ]
+      ],
+      "from": "+Z",
+      "as": "ochre"
+     },
+     {
+      "what": "the same line down the clamp's rear face",
+      "box_cm": [
+       [
+        -12.45,
+        0.74,
+        11.25
+       ],
+       [
+        -12.2,
+        0.9,
+        12.55
+       ]
+      ],
+      "from": "-X",
+      "as": "ochre"
+     }
+    ]
+   }
+  }
+ ],
+ "not_among_the_12": "tape_src (a gen of worn cloth tape, --kind decal, never made into a set) and the later label_aged are not part of this record."
+}

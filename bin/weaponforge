@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# weaponforge: build a game weapon from its definition (weapons/<id>/). See README.md.
+#
+#   weaponforge list                                  the weapons defined
+#   weaponforge new <id> <Name> <TAG>                 start a weapon from the template (weapons/<id>/)
+#   weaponforge settings                              every setting, its value and where it came from (weaponforge.toml, env)
+#   weaponforge <id> <stage> [<stage> ...] [options]  run pipeline stages headless (model uv bake texture rig check export render verify, all)
+#   weaponforge <id> view                             a .glb of the exported weapon with its textures inside, for a browser viewer
+#   weaponforge <id> hero [--shots ...] [--pose NAME] presentation pictures of the exported weapon (--shots default,beauty,fp,ads,left,right,outline;
+#                                                     --pose: the weapon in one of its poses)
+#   weaponforge <id> review [--against DIR] [--critic 'cmd {a} {b} {name} {rubric} {out}']
+#                                                     a review pack: pictures, native crops, figures, a contact sheet; pairs against
+#                                                     another build; a judge for each pair (README "Review")
+#   weaponforge <id> unreal-import | unreal-check     import the exported weapon into Unreal / read it back
+#                                                     (integrations/unreal/run.sh; needs unreal.editor and unreal.project)
+#
+# Stage options:   --root DIR   write everything, the spec included, under DIR/<id>/ (a test copy; never the real files).
+#   --size N (bake, texture: pixels)   --cpu   --only a,b   --lp-only   --hp-only (model)   --force (export a stale chain)
+#   --what grey,look,game,poses,eyes   --samples N   --res WxH (render)   --strict (check, export: exit 1 on a miss)
+#   --no-save   --blend PATH
+# Unreal options:  --reimport | --reimport-meshes | --reimport-static   --replace-referenced
+#   --dest <content>/_Scratch/<Name> (a trial run)   --remove (delete that trial folder)
+#
+# Blender: $WEAPONFORGE_BLENDER, else `blender` in weaponforge.toml, else `blender` on PATH. A Windows Blender (a .exe) run
+# from WSL is given every path in Windows form (wslpath), and the WEAPONFORGE_* variables through WSLENV.
+set -euo pipefail
+
+TOOL="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+usage() { awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "${BASH_SOURCE[0]}"; }
+
+setting() {  # the value of one setting (weaponforge/settings.py: environment, then weaponforge.toml, then the default)
+    command -v python3 >/dev/null 2>&1 || { echo "weaponforge: python3 is needed to read the settings" >&2; return 2; }
+    python3 "$TOOL/weaponforge/settings.py" get "$1"
+}
+
+[ $# -ge 1 ] || { usage; exit 2; }
+
+case "$1" in
+    -h|--help|help) usage; exit 0 ;;
+    list)
+        for d in "$TOOL"/weapons/*/; do [ -f "$d/weapon.py" ] && basename "$d"; done
+        exit 0 ;;
+    new)
+        [ $# -eq 4 ] || { echo "usage: weaponforge new <id> <Name> <TAG>   e.g. weaponforge new shotgun_g1 ShotgunG1 SG1" >&2; exit 2; }
+        exec python3 "$TOOL/bin/new_weapon.py" "$2" "$3" "$4" ;;
+    settings)
+        exec python3 "$TOOL/weaponforge/settings.py" ;;
+esac
+
+WEAPON="$1"; shift
+[ -f "$TOOL/weapons/$WEAPON/weapon.py" ] || { echo "no weapon '$WEAPON' (have: $("$0" list | tr '\n' ' '))" >&2; exit 2; }
+
+case "${1:-}" in
+    unreal-import|unreal-check)
+        what="import"; [ "$1" = unreal-check ] && what="check"
+        shift
+        exec bash "$TOOL/integrations/unreal/run.sh" "$what" --weapon "$WEAPON" "$@" ;;
+esac
+
+BLENDER="${WEAPONFORGE_BLENDER:-}"
+if [ -z "$BLENDER" ] && { [ -n "${WEAPONFORGE_CONFIG:-}" ] || [ -f "$TOOL/weaponforge.toml" ]; }; then
+    BLENDER="$(setting blender)" || exit 2
+fi
+if [ -z "$BLENDER" ]; then
+    BLENDER="$(command -v blender 2>/dev/null || true)"
+    [ -n "$BLENDER" ] || { echo "weaponforge: no Blender. Set WEAPONFORGE_BLENDER, or blender = \"...\" in weaponforge.toml (see weaponforge.example.toml), or put blender on PATH. Blender 5.2 is needed." >&2; exit 2; }
+fi
+[ -x "$BLENDER" ] || [ -f "$BLENDER" ] || { echo "weaponforge: Blender not found at $BLENDER (WEAPONFORGE_BLENDER, or blender in weaponforge.toml)" >&2; exit 2; }
+
+win() {  # a path the Windows Blender understands (unchanged when not under WSL, or when it is a Windows path already)
+    case "$1" in
+        [A-Za-z]:[\\/]*|\\\\*) printf '%s' "$1"; return ;;
+    esac
+    case "$BLENDER" in *.exe) ;; *) printf '%s' "$1"; return ;; esac      # a Linux or macOS Blender reads the path as it is
+    if command -v wslpath >/dev/null 2>&1; then wslpath -w "$1"; else printf '%s' "$1"; fi
+}
+
+case "$BLENDER" in
+    *.exe)   # a Windows program sees only the variables WSLENV names; weaponforge/settings.py converts /mnt/x/... paths itself
+        for name in $(compgen -e); do
+            case "$name" in WEAPONFORGE_*|WSL_DISTRO_NAME)
+                case ":${WSLENV:-}:" in *":$name:"*|*":$name/"*) ;; *) WSLENV="${WSLENV:+$WSLENV:}$name" ;; esac ;;
+            esac
+        done
+        export WSLENV ;;
+esac
+
+# options that carry a path are handed over in Blender's form; --critic is the launcher's own (it runs on this side)
+args=()
+critic=""
+review=0
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --root|--blend|--against|--out) [ $# -ge 2 ] || { echo "$1 needs a path" >&2; exit 2; }; args+=("$1" "$(win "$2")"); shift 2 ;;
+        --root=*|--blend=*|--against=*|--out=*) args+=("${1%%=*}" "$(win "${1#*=}")"); shift ;;
+        --critic) [ $# -ge 2 ] || { echo "--critic needs a command" >&2; exit 2; }; critic="$2"; shift 2 ;;
+        --critic=*) critic="${1#*=}"; shift ;;
+        review) review=1; args+=("$1"); shift ;;
+        *) args+=("$1"); shift ;;
+    esac
+done
+[ -z "$critic" ] || [ $review = 1 ] || { echo "--critic goes with review" >&2; exit 2; }
+
+if [ $review = 0 ]; then
+    exec "$BLENDER" -b --factory-startup --python-exit-code 1 --python "$(win "$TOOL/weaponforge/cli.py")" -- "$WEAPON" ${args[@]+"${args[@]}"}
+fi
+
+# review: Blender makes the pack and says where it is; the critic, if any, runs here, where the command was written for
+note="$(mktemp)"
+trap 'rm -f "$note"' EXIT
+"$BLENDER" -b --factory-startup --python-exit-code 1 --python "$(win "$TOOL/weaponforge/cli.py")" -- "$WEAPON" ${args[@]+"${args[@]}"} --pack-file "$(win "$note")" || exit $?
+pack="$(cat "$note")"
+rm -f "$note"
+[ -n "$pack" ] || { echo "review: Blender did not say where the pack is" >&2; exit 1; }
+case "$BLENDER" in *.exe) if command -v wslpath >/dev/null 2>&1; then pack="$(wslpath -u "$pack")"; fi ;; esac
+echo "[weaponforge] review pack: $pack"
+# what the comparison found that the reader must not miss (compare.json "warnings": the two builds' textures differ in size, ...)
+if [ -f "$pack/compare.json" ] && command -v python3 >/dev/null 2>&1; then
+    python3 - "$pack/compare.json" <<'EOF' || true
+import json, sys
+try:
+    with open(sys.argv[1], encoding='utf-8') as fh:
+        for w in json.load(fh).get('warnings', []):
+            print('[weaponforge] review WARNING: ' + w)
+except (OSError, ValueError):
+    pass
+EOF
+fi
+[ -z "$critic" ] || exec python3 "$TOOL/weaponforge/critic.py" "$pack" "$critic"

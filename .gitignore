@@ -1,0 +1,10 @@
+# your own settings (weaponforge.example.toml is the template)
+weaponforge.toml
+
+# everything the tool writes by default: builds, test roots, galleries, Unreal logs
+build/
+
+# caches
+__pycache__/
+*.py[cod]
+*.blend1
